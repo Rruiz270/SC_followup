@@ -7,15 +7,13 @@ const TeamView = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedWorkstream, setSelectedWorkstream] = useState(null);
 
-  // Get tasks assigned to a team member
-  const getTasksForMember = (memberName) => {
+  // Get tasks assigned to a team member (exact full name match)
+  const getTasksForMember = (fullName) => {
     const tasks = [];
+    const nameLower = fullName.toLowerCase();
     projectData.workstreams.forEach(ws => {
       ws.tasks.forEach(task => {
-        if (task.assignees && task.assignees.some(a =>
-          a.toLowerCase().includes(memberName.toLowerCase()) ||
-          memberName.toLowerCase().includes(a.toLowerCase())
-        )) {
+        if (task.assignees && task.assignees.some(a => a.toLowerCase() === nameLower)) {
           tasks.push({ ...task, workstreamId: ws.id, workstreamName: ws.name, workstreamColor: ws.color });
         }
       });
@@ -43,7 +41,7 @@ const TeamView = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projectData.team.map((member) => {
-          const tasks = getTasksForMember(member.name.split(' ')[0]);
+          const tasks = getTasksForMember(member.name);
           const completedCount = tasks.filter(t => t.status === 'completed').length;
           const avgProgress = tasks.length > 0
             ? Math.round(tasks.reduce((s, t) => s + t.progress, 0) / tasks.length)
